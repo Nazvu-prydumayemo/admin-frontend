@@ -23,10 +23,10 @@ jobs:
             exe_name: NP-Tennis-Admin.exe
             asset_name: NP-Tennis-Admin-windows_${{ github.event.inputs.version }}.exe
           - os: ubuntu-latest
-            exe_name: NP-Tennis
+            exe_name: NP-Tennis-Admin
             asset_name: NP-Tennis-Admin-linux_${{ github.event.inputs.version }}
           - os: macos-latest
-            exe_name: NP-Tennis
+            exe_name: NP-Tennis-Admin
             asset_name: NP-Tennis-Admin-macos_${{ github.event.inputs.version }}
 
     runs-on: ${{ matrix.os }}
