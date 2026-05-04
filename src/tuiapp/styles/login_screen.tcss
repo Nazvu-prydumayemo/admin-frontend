@@ -1,0 +1,59 @@
+LoginScreen {
+    align: center middle;
+    height: 100%;
+    width: 100%;
+}
+
+#login-container {
+    align: center middle;
+    height: auto;
+    width: auto;
+    background: $panel;
+    border: round $accent;
+    padding: 2 4;
+
+    #title {
+        text-align: center;
+        text-style: bold;
+        color: $accent;
+        padding: 1;
+        margin-bottom: 1;
+    }
+
+    #login {
+        margin-top: 1;
+        margin-bottom: 1;
+    }
+
+    #forgot-password {
+        background: transparent;
+        border: none;
+        color: $accent;
+        height: auto;
+        min-width: 0;
+        padding: 0;
+        height: auto;
+        width: 100%;
+        text-align: center;
+    }
+
+    #forgot-password:focus {
+        background: $accent;
+        color: $background;
+        text-style: bold;
+    }
+}
+
+LoginForm {
+    height: auto;
+
+    #login-form {
+        width: 100%;
+        height: auto;
+
+        .field {
+            height: auto;
+            margin-bottom: 1;
+        }
+    }
+}

@@ -1,0 +1,75 @@
+import sys
+from collections.abc import Iterable
+from pathlib import Path
+from typing import ClassVar
+
+from textual.app import App, SystemCommand
+from textual.screen import Screen
+
+from tuiapp.api.auth.auth import AuthService
+from tuiapp.api.auth.token_manager import TokenManagerService
+from tuiapp.api.client import APIClient
+from tuiapp.screens.dashboard_screen import DashboardScreen
+from tuiapp.screens.login_screen import LoginScreen
+from tuiapp.themes import tennis_theme, tennis_theme_alpha, tennis_theme_minimal
+
+
+def get_css_folder_path() -> Path:
+    """Get the path to the CSS folder, handling PyInstaller bundling."""
+    if getattr(sys, "frozen", False):
+        return Path(sys._MEIPASS) / "styles"  # type: ignore[attr-defined]
+    else:
+        return Path(__file__).parent / "styles"
+
+
+class TUIApplication(App):
+    """Root application class for the Tennis TUI."""
+
+    def __init__(self, client: APIClient, token_manager: TokenManagerService) -> None:
+        """Initialize the application with an API client.
+
+        Args:
+            client: The API client for communicating with the backend.
+        """
+        super().__init__()
+        self.client = client
+        self.token_manager = token_manager
+
+        self.auth = AuthService(self.client)
+
+        self.register_theme(tennis_theme)
+        self.register_theme(tennis_theme_minimal)
+        self.register_theme(tennis_theme_alpha)
+        # self.theme = "np-tennis" # Disabled for now
+
+    DEFAULT_CSS_FOLDER = get_css_folder_path()
+    CSS_PATH: ClassVar = [
+        DEFAULT_CSS_FOLDER / "styles.tcss",
+        DEFAULT_CSS_FOLDER / "buttons.tcss",
+        DEFAULT_CSS_FOLDER / "login_screen.tcss",
+        DEFAULT_CSS_FOLDER / "modals.tcss",
+    ]
+    TITLE = "NP-Tennis Admin"
+    SUB_TITLE = "Tennis App Admin Client"
+
+    SCREENS: ClassVar[dict] = {
+        "login": LoginScreen,
+    }
+
+    def go_minimal(self) -> None:
+        self.theme = "np-tennis-minimal"
+
+    def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
+        yield from super().get_system_commands(screen)
+        yield SystemCommand(
+            "Minimal", "Activate the, objectively, better theme and go minimal", self.go_minimal
+        )
+
+    async def on_mount(self) -> None:
+        """Mount the first screen when the app starts."""
+        session = await self.token_manager.refresh_access_token()
+        if not session:
+            self.push_screen("login")
+            return
+
+        self.push_screen(DashboardScreen())

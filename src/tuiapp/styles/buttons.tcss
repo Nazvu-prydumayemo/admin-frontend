@@ -1,0 +1,3 @@
+PrimaryButton, SecondaryButton, DangerButton {
+    width: 32;
+}
