@@ -57,6 +57,7 @@ class AuthService:
             return TokenResult(token=token, message="Login successful", status="success")
 
         except APIError as error:
+            self._client.set_access_token(None)
             if error.status_code in (400, 401, 422):
                 return TokenResult(
                     token=None, message="Invalid username or password", status="invalid"
