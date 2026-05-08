@@ -1,0 +1,66 @@
+#hub-container {
+    height: 1fr;
+    width: 100%;
+}
+
+CourtView {
+    #court-scroll {
+        height: 100%;
+        width: 100%;
+    }
+
+    #court-header {
+        width: 100%;
+        min-height: 8;
+        background: $primary;
+        layout: horizontal;
+        margin: 1 2;
+        padding: 1 2;
+        align: left middle;
+    }
+
+    #court-header-info {
+        width: 1fr;
+        height: 100%;
+        padding: 1 2;
+    }
+
+    #court-title {
+        text-style: bold;
+        color: $foreground;
+    }
+
+    #court-subtitle {
+        color: $foreground 80%;
+    }
+
+    #court-body {
+        height: auto;
+        width: 100%;
+        padding: 2;
+    }
+
+    #court-info-card {
+        width: 2fr;
+        height: auto;
+        background: $panel;
+        border: round $accent;
+        padding: 2 4;
+        margin-right: 1;
+    }
+
+    #court-info-title {
+        text-style: bold;
+        margin-bottom: 1;
+    }
+
+    .info-label {
+        color: $foreground 50%;
+        margin-top: 1;
+    }
+
+    .info-value {
+        color: $foreground;
+        text-style: bold;
+    }
+}
