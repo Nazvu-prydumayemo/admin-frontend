@@ -79,8 +79,12 @@ class CourtView(BaseView):
         try:
             indoor_btn = self.query_one("#court-facility-indoor", RadioButton)
             outdoor_btn = self.query_one("#court-facility-outdoor", RadioButton)
+            indoor_btn.value = False
+            outdoor_btn.value = False
+
             indoor_btn.value = is_indoor
             outdoor_btn.value = not is_indoor
+
         except NoMatches:
             pass
 

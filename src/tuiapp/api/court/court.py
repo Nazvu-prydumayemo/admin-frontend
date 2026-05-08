@@ -1,5 +1,11 @@
 from tuiapp.api.client import APIClient
-from tuiapp.api.court.schema import Court, CourtResult, CourtsAll, CourtsAllResult
+from tuiapp.api.court.schema import (
+    Court,
+    CourtResult,
+    CourtsAll,
+    CourtsAllResult,
+    CreateCourtRequest,
+)
 from tuiapp.api.errors import APIError
 from tuiapp.api.schema import Result
 
@@ -19,6 +25,22 @@ class CourtService:
 
             if error.status_code == 404:
                 return CourtResult(message=f"Court {id} does not exist", status="error", court=None)
+
+            if error.status_code == 422:
+                return CourtResult(message="Invalid data provided", status="error", court=None)
+
+            return CourtResult(
+                message=f"Server Error: {error.status_code}", status="error", court=None
+            )
+
+    async def post_court(self, json: CreateCourtRequest) -> CourtResult:
+        try:
+            response = await self._client.post("/courts/", json=json, response_model=Court)
+            return CourtResult(message=f"Created court: {id}", status="success", court=response)
+
+        except APIError as error:
+            if error.status_code == 401:
+                return CourtResult(message="Not authenticated", status="invalid", court=None)
 
             if error.status_code == 422:
                 return CourtResult(message="Invalid data provided", status="error", court=None)

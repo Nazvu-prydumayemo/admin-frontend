@@ -1,7 +1,10 @@
 """Hub screen - the main authenticated user dashboard."""
 
+from typing import ClassVar
+
 from textual import on
 from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.css.query import NoMatches
 from textual.events import Mount
 from textual.reactive import reactive
@@ -11,14 +14,28 @@ from tuiapp.api.court.schema import Court
 from tuiapp.screens.base_screen import AuthScreen
 from tuiapp.widgets.courts.card_container import CardContainer
 from tuiapp.widgets.courts.court_card import CourtCard
+from tuiapp.widgets.modals.create_court_modal import CreateCourtModal
 from tuiapp.widgets.views.court_view import CourtView
 
 
 class DashBoardScreen(AuthScreen):
     """Main dashboard screen displayed after successful authentication."""
 
-    courts: list[Court] | None = None
+    courts: reactive[list[Court] | None] = reactive(None)
     selected_court: reactive[Court | None] = reactive(None)
+
+    BINDINGS: ClassVar[list[Binding]] = [
+        *AuthScreen.BINDINGS,
+        Binding(
+            key="ctrl+n",
+            action="push_court_creation",
+            description="New Court",
+            tooltip="Create a New Court",
+        ),
+    ]
+
+    def action_push_court_creation(self) -> None:
+        self.show_modal(CreateCourtModal(), self._on_court_created)
 
     PAGE_SIZE = 100
 
@@ -32,7 +49,15 @@ class DashBoardScreen(AuthScreen):
     @on(Mount)
     async def _auth_guard(self) -> None:
         await super()._auth_guard()
+        await self._load_courts()
 
+    async def _on_court_created(self, created: bool) -> None:
+        """Called when CreateCourtModal is dismissed. Reloads courts if creation succeeded."""
+        if created:
+            self.page = 0
+            await self._load_courts()
+
+    async def _load_courts(self) -> None:
         result = await self.app.court.get_all_courts(
             self._get_page_offset(self.page), self.PAGE_SIZE
         )
@@ -41,25 +66,30 @@ class DashBoardScreen(AuthScreen):
             return
 
         self.courts = result.courts.items if result.courts and result.courts.items else None
-
-        container = self.query_one(CardContainer)
-        if not self.courts:
-            return
-
-        for court in self.courts:
-            await container.mount(CourtCard(court=court))
-
-        self.selected_court = self.courts[0]
+        self.selected_court = self.courts[0] if self.courts else None
         self.page += 1
 
-    def watch_selected_court(self, new_court: Court) -> None:
+    def watch_selected_court(self, new_court: Court | None = None) -> None:
         if new_court:
             try:
                 view = self.query_one(CourtView)
                 view.court = new_court
-
             except NoMatches:
                 pass
+
+    def watch_courts(self, new_courts: list[Court] | None = None) -> None:
+        try:
+            container = self.query_one(CardContainer)
+            container.remove_children()
+
+            if not new_courts:
+                return
+
+            for court in new_courts:
+                container.mount(CourtCard(court=court))
+
+        except NoMatches:
+            pass
 
     def compose(self) -> ComposeResult:
         yield Header()
