@@ -64,6 +64,9 @@ class DashBoardScreen(AuthScreen):
     def compose(self) -> ComposeResult:
         yield Header()
         with TabbedContent(id="hub-container"):
+            with TabPane("Statistics", id="statistics-info"):
+                pass
+
             with TabPane("Courts", id="court-info"):
                 with CardContainer(id="court-list"):
                     pass
