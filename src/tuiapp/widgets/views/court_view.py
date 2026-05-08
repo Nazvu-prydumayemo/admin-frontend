@@ -1,5 +1,6 @@
 from typing import Any
 
+from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal, ScrollableContainer, Vertical
 from textual.css.query import NoMatches
@@ -10,6 +11,7 @@ from textual.widgets import Input, RadioButton, RadioSet, Static
 from tuiapp.api.court.schema import Court
 from tuiapp.widgets.buttons import DangerButton, PrimaryButton
 from tuiapp.widgets.inputs import TextInput
+from tuiapp.widgets.modals.confirmation_modal import ConfirmationModal
 from tuiapp.widgets.views.base_view import BaseView
 
 
@@ -121,6 +123,27 @@ class CourtView(BaseView):
         self._set_input("court-price", f"{court.price_per_hour:.2f}")
         self._set_facility(court.is_indoor)
         self._set_input("court-hours", court.working_hours or "N/A")
+
+    @on(DangerButton.Pressed, "#delete-court")
+    async def delete_court(self) -> None:
+        if not self.court:
+            return
+
+        self.screen.show_modal(ConfirmationModal("Delete Court"), self._delete_court)
+
+    async def _delete_court(self, delete: bool | None) -> None:
+        if not delete:
+            return
+
+        if not self.court:
+            return
+
+        response = await self.app.court.delete_court(id=self.court.id)
+        if response.status != "success":
+            self.notify(response.status, title="Courts", severity="error")
+            return
+
+        self.court = None
 
     def on_view_closed(self) -> None:
         pass
