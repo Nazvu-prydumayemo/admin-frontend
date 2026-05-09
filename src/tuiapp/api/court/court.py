@@ -7,7 +7,6 @@ from tuiapp.api.court.schema import (
     CreateCourtRequest,
 )
 from tuiapp.api.errors import APIError
-from tuiapp.api.schema import Result
 
 
 class CourtService:
@@ -49,22 +48,24 @@ class CourtService:
                 message=f"Server Error: {error.status_code}", status="error", court=None
             )
 
-    async def delete_court(self, id: int) -> Result:
+    async def delete_court(self, id: int) -> CourtResult:
         try:
-            _ = await self._client.delete(f"/courts/{id}", response_model=None)
-            return Result(message=f"Deleted court: {id}", status="success")
+            response = await self._client.delete(f"/courts/{id}", response_model=Court)
+            return CourtResult(message=f"Deleted court: {id}", status="success", court=response)
 
         except APIError as error:
             if error.status_code == 401:
-                return Result(message="Not authenticated", status="invalid")
+                return CourtResult(message="Not authenticated", status="invalid", court=None)
 
             if error.status_code == 404:
-                return Result(message=f"Court {id} does not exist", status="error")
+                return CourtResult(message=f"Court {id} does not exist", status="error", court=None)
 
             if error.status_code == 422:
-                return Result(message="Invalid data provided", status="error")
+                return CourtResult(message="Invalid data provided", status="error", court=None)
 
-            return Result(message=f"Server Error: {error.status_code}", status="error")
+            return CourtResult(
+                message=f"Server Error: {error.status_code}", status="error", court=None
+            )
 
     async def get_all_courts(self, skip: int, limit: int = 10) -> CourtsAllResult:
         try:
