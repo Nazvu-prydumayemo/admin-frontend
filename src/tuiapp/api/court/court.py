@@ -1,5 +1,6 @@
 from tuiapp.api.client import APIClient
 from tuiapp.api.court.schema import (
+    ChangeCourtRequest,
     Court,
     CourtResult,
     CourtsAll,
@@ -52,6 +53,25 @@ class CourtService:
         try:
             response = await self._client.delete(f"/courts/{id}", response_model=Court)
             return CourtResult(message=f"Deleted court: {id}", status="success", court=response)
+
+        except APIError as error:
+            if error.status_code == 401:
+                return CourtResult(message="Not authenticated", status="invalid", court=None)
+
+            if error.status_code == 404:
+                return CourtResult(message=f"Court {id} does not exist", status="error", court=None)
+
+            if error.status_code == 422:
+                return CourtResult(message="Invalid data provided", status="error", court=None)
+
+            return CourtResult(
+                message=f"Server Error: {error.status_code}", status="error", court=None
+            )
+
+    async def patch_court(self, id: int, json: ChangeCourtRequest) -> CourtResult:
+        try:
+            response = await self._client.patch(f"/courts/{id}", json=json, response_model=Court)
+            return CourtResult(message=f"Changed court: {id}", status="success", court=response)
 
         except APIError as error:
             if error.status_code == 401:

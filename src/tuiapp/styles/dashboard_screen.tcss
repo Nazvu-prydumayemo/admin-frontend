@@ -7,7 +7,9 @@
 #buttons-container {
     layout: horizontal;
     width: 100%;
-    margin: 1;
+    margin-left: 1;
+    margin-bottom: 1;
+    margin-top: 1;
     height: auto;
 
     #span {
@@ -25,6 +27,7 @@ CourtView {
     #court-body {
         height: auto;
         width: 100%;
+        margin-left: 1;
     }
 
     #court-info-card {
