@@ -9,7 +9,8 @@ from textual.screen import Screen
 from tuiapp.api.auth.auth import AuthService
 from tuiapp.api.auth.token_manager import TokenManagerService
 from tuiapp.api.client import APIClient
-from tuiapp.screens.dashboard_screen import DashboardScreen
+from tuiapp.api.court.court import CourtService
+from tuiapp.screens.dashboard_screen import DashBoardScreen
 from tuiapp.screens.login_screen import LoginScreen
 from tuiapp.themes import tennis_theme, tennis_theme_alpha, tennis_theme_minimal
 
@@ -34,7 +35,7 @@ class TUIApplication(App):
         super().__init__()
         self.client = client
         self.token_manager = token_manager
-
+        self.court = CourtService(self.client)
         self.auth = AuthService(self.client)
 
         self.register_theme(tennis_theme)
@@ -48,6 +49,9 @@ class TUIApplication(App):
         DEFAULT_CSS_FOLDER / "buttons.tcss",
         DEFAULT_CSS_FOLDER / "login_screen.tcss",
         DEFAULT_CSS_FOLDER / "modals.tcss",
+        DEFAULT_CSS_FOLDER / "courts.tcss",
+        DEFAULT_CSS_FOLDER / "stats.tcss",
+        DEFAULT_CSS_FOLDER / "dashboard_screen.tcss",
     ]
     TITLE = "NP-Tennis Admin"
     SUB_TITLE = "Tennis App Admin Client"
@@ -72,4 +76,4 @@ class TUIApplication(App):
             self.push_screen("login")
             return
 
-        self.push_screen(DashboardScreen())
+        self.push_screen(DashBoardScreen())

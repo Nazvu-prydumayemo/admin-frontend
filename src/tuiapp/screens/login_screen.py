@@ -7,7 +7,7 @@ from textual.widgets import Button, Footer, Header, Input, Static
 
 from tuiapp.api.auth.schema import LoginRequest, TokenResult
 from tuiapp.screens.base_screen import BaseScreen
-from tuiapp.screens.dashboard_screen import DashboardScreen
+from tuiapp.screens.dashboard_screen import DashBoardScreen
 from tuiapp.widgets.buttons import PrimaryButton
 from tuiapp.widgets.forms.login_form import LoginForm
 
@@ -61,4 +61,4 @@ class LoginScreen(BaseScreen):
             self.app.token_manager.access_token = response.token.access_token
             self.app.client.set_access_token(response.token.access_token)
 
-            self.app.switch_screen(DashboardScreen())
+            self.app.switch_screen(DashBoardScreen())

@@ -1,0 +1,83 @@
+#hub-container {
+    height: 1fr;
+    width: 100%;
+    padding: 1 2;
+}
+
+#buttons-container {
+    layout: horizontal;
+    width: 100%;
+    margin-left: 1;
+    margin-bottom: 1;
+    margin-top: 1;
+    height: auto;
+
+    #span {
+        width: 1fr;
+        height: 1;
+    }
+}
+
+CourtView {
+    #court-scroll {
+        height: 100%;
+        width: 100%;
+    }
+
+    #court-body {
+        height: auto;
+        width: 100%;
+        margin-left: 1;
+    }
+
+    #court-info-card {
+        width: 2fr;
+        height: auto;
+        background: $panel;
+        border: round $accent;
+        padding: 1 2;
+    }
+
+    #court-info-title {
+        text-style: bold;
+        margin-bottom: 1;
+    }
+
+    .info-label {
+        color: $foreground 50%;
+        margin-top: 1;
+        margin-bottom: 1;
+    }
+
+    .info-value {
+        color: $foreground;
+        text-style: bold;
+        border: none;
+        background: transparent;
+        padding-left: 1;
+        padding-right: 1;
+        height: auto;
+    }
+
+    .info-value:focus {
+        border: tall $accent;
+        background: $panel-darken-1;
+    }
+
+    #court-facility {
+        height: auto;
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    #court-facility > RadioButton {
+        background: transparent;
+        padding: 0 1;
+    }
+
+    #court-facility:focus-within {
+        border: none;
+    }
+}

@@ -151,6 +151,20 @@ class APIClient:
         data = await self._request("PATCH", endpoint, json=json, **kwargs)
         return TypeAdapter(response_model).validate_python(data)
 
+    async def delete(self, endpoint: str, response_model: type[T] | None, **kwargs) -> T | None:
+        """Send an HTTP DELETE request to the API.
+
+        Args:
+            endpoint: The API endpoint to request.
+            response_model: The Pydantic model to validate the response.
+            **kwargs: Additional arguments to pass to the request.
+
+        Returns:
+            The validated response data as the specified model or None.
+        """
+        data = await self._request("DELETE", endpoint, **kwargs)
+        return TypeAdapter(response_model).validate_python(data) if response_model else None
+
     async def __aenter__(self) -> Self:
         return self
 

@@ -1,0 +1,45 @@
+StatCard {
+    height: auto;
+    min-height: 8;
+    width: 1fr;
+    background: $panel;
+    padding: 1 2;
+    margin-right: 2;
+    margin-bottom: 1;
+
+    .stat-card-title {
+        color: $foreground 70%;
+        text-style: bold;
+        width: 100%;
+    }
+
+    .stat-card-value {
+        color: $accent;
+        text-style: bold;
+        width: 100%;
+        margin-top: 1;
+    }
+
+    .stat-card-description {
+        color: $foreground 50%;
+        width: 100%;
+        margin-top: 1;
+    }
+
+    .stat-card-body {
+        height: auto;
+        width: 100%;
+    }
+}
+
+StatCard:hover {
+    background: $surface;
+}
+
+.stats-container {
+    height: auto;
+    width: 100%;
+    align: left top;
+    overflow-x: auto;
+    padding: 1 2;
+}
