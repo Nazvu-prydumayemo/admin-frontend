@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from textual import on
 from textual.containers import Container, Vertical
+from textual.reactive import reactive
 from textual.validation import Number
 from textual.widgets import Button, Input, RadioButton, RadioSet, Static
 
@@ -14,10 +15,21 @@ from tuiapp.widgets.modals.base_modal import BaseModal
 
 if TYPE_CHECKING:
     from textual.app import ComposeResult
+    from textual.events import Resize
 
 
 class CreateCourtModal(BaseModal):
     """Modal for creating a new court."""
+
+    SMALL_WIDTH_THRESHOLD = 64
+
+    small: reactive[bool] = reactive(False)
+
+    def watch_small(self, value: bool) -> None:
+        self.set_class(value, "small")
+
+    def on_resize(self, event: Resize) -> None:
+        self.small = event.size.width < self.SMALL_WIDTH_THRESHOLD
 
     def compose_modal(self) -> ComposeResult:
         """Compose the modal with court detail inputs and action buttons."""

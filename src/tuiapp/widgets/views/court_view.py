@@ -115,7 +115,7 @@ class CourtView(BaseView):
             pass
 
     def on_resize(self) -> None:
-        self.small = self.size.width <= 64
+        self.small = self.size.width <= 70
 
     def watch_court(self, court: Any) -> None:
         self.on_view_activated()

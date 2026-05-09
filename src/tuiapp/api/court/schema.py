@@ -30,6 +30,18 @@ class CreateCourtRequest(BaseModel):
     working_hours: str | None = None
 
 
+class ChangeCourtRequest(BaseModel):
+    name: str | None = None
+    description: str | None = None
+
+    surface_type: str | None = None
+    is_indoor: bool | None = None
+
+    location: str | None = None
+    price_per_hour: float | None = None
+    working_hours: str | None = None
+
+
 class CourtResult(Result):
     court: Court | None
 

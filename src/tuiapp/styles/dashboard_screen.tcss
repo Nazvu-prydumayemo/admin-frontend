@@ -1,6 +1,7 @@
 #hub-container {
     height: 1fr;
     width: 100%;
+    padding: 1 2;
 }
 
 #buttons-container {
@@ -24,7 +25,6 @@ CourtView {
     #court-body {
         height: auto;
         width: 100%;
-        margin: 1;
     }
 
     #court-info-card {
@@ -32,7 +32,7 @@ CourtView {
         height: auto;
         background: $panel;
         border: round $accent;
-        padding: 2 4;
+        padding: 1 2;
     }
 
     #court-info-title {

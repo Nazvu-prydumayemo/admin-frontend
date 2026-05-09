@@ -70,12 +70,14 @@ class DashBoardScreen(AuthScreen):
         self.page += 1
 
     def watch_selected_court(self, new_court: Court | None = None) -> None:
-        if new_court:
-            try:
-                view = self.query_one(CourtView)
-                view.court = new_court
-            except NoMatches:
-                pass
+        try:
+            for card in self.query(CourtCard):
+                card.selected = card.court == new_court
+
+            view = self.query_one(CourtView)
+            view.court = new_court
+        except NoMatches:
+            pass
 
     def watch_courts(self, new_courts: list[Court] | None = None) -> None:
         try:
@@ -86,7 +88,9 @@ class DashBoardScreen(AuthScreen):
                 return
 
             for court in new_courts:
-                container.mount(CourtCard(court=court))
+                card = CourtCard(court=court)
+                card.selected = court == self.selected_court
+                container.mount(card)
 
         except NoMatches:
             pass

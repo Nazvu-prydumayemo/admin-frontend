@@ -80,10 +80,17 @@ DeleteAccountModal {
 }
 
 CreateCourtModal {
+    align: center middle;
+
     #modal-container {
         border: round $accent;
         layout: vertical;
-        width: 60;
+        width: 60%;
+        min-width: 40;
+        max-width: 80;
+        height: auto;
+        max-height: 90%;
+        overflow-y: auto;
         margin: 2;
 
         #court-icon {
@@ -129,5 +136,27 @@ CreateCourtModal {
                 width: 100%;
             }
         }
+    }
+
+    &.small #modal-container {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        margin: 0;
+        border: none;
+        max-height: 100%;
+    }
+
+    &.small #court-icon {
+        height: 2;
+        margin: 0 0 1 0;
+    }
+
+    &.small .field {
+        margin: 0;
+    }
+
+    &.small #buttons-container {
+        margin-top: 1;
     }
 }
