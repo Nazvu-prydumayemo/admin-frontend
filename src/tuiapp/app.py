@@ -50,6 +50,7 @@ class TUIApplication(App):
         DEFAULT_CSS_FOLDER / "login_screen.tcss",
         DEFAULT_CSS_FOLDER / "modals.tcss",
         DEFAULT_CSS_FOLDER / "courts.tcss",
+        DEFAULT_CSS_FOLDER / "stats.tcss",
         DEFAULT_CSS_FOLDER / "dashboard_screen.tcss",
     ]
     TITLE = "NP-Tennis Admin"

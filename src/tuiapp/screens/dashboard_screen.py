@@ -15,6 +15,8 @@ from tuiapp.screens.base_screen import AuthScreen
 from tuiapp.widgets.courts.card_container import CardContainer
 from tuiapp.widgets.courts.court_card import CourtCard
 from tuiapp.widgets.modals.create_court_modal import CreateCourtModal
+from tuiapp.widgets.stat_card import StatCard
+from tuiapp.widgets.stats_container import StatsContainer
 from tuiapp.widgets.views.court_view import CourtView
 
 
@@ -99,7 +101,27 @@ class DashBoardScreen(AuthScreen):
         yield Header()
         with TabbedContent(id="hub-container"):
             with TabPane("Statistics", id="statistics-info"):
-                pass
+                with StatsContainer(id="stats-container"):
+                    yield StatCard(
+                        title="Total Courts",
+                        value="12",
+                        description="Active tennis courts",
+                    )
+                    yield StatCard(
+                        title="Total Revenue",
+                        value="$4,250",
+                        description="This month",
+                    )
+                    yield StatCard(
+                        title="Active Users",
+                        value="48",
+                        description="Registered players",
+                    )
+                    yield StatCard(
+                        title="Bookings Today",
+                        value="15",
+                        description="Confirmed reservations",
+                    )
 
             with TabPane("Courts", id="court-info"):
                 with CardContainer(id="court-list"):
