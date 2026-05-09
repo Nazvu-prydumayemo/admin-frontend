@@ -136,3 +136,8 @@ class DashBoardScreen(AuthScreen):
     @on(CourtCard.Pressed)
     def on_court_card_pressed(self, event: CourtCard.Pressed) -> None:
         self.selected_court = event.court_card.court
+
+    @on(CourtView.CourtDeleted)
+    async def on_court_deleted(self) -> None:
+        self.page = 0
+        await self._load_courts()

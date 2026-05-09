@@ -4,6 +4,7 @@ from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal, ScrollableContainer, Vertical
 from textual.css.query import NoMatches
+from textual.message import Message
 from textual.reactive import reactive
 from textual.validation import Number
 from textual.widgets import Input, RadioButton, RadioSet, Static
@@ -22,6 +23,9 @@ class CourtView(BaseView):
 
     court: reactive[Court | None] = reactive(None)
     small: reactive[bool] = reactive(False)
+
+    class CourtDeleted(Message):
+        pass
 
     def compose_view(self) -> ComposeResult:
         with ScrollableContainer(id="court-scroll"):
@@ -118,7 +122,22 @@ class CourtView(BaseView):
 
     def on_view_activated(self) -> None:
         court = self.court
-        if court is None:
+        is_empty = court is None
+
+        try:
+            self.query_one("#court-scroll", ScrollableContainer).disabled = is_empty
+            self.query_one("#update-court", PrimaryButton).disabled = is_empty
+            self.query_one("#delete-court", DangerButton).disabled = is_empty
+        except NoMatches:
+            pass
+
+        if is_empty:
+            self._set_input("court-name", "N/A")
+            self._set_input("court-location", "N/A")
+            self._set_input("court-surface", "N/A")
+            self._set_input("court-price", "0.0")
+            self._set_facility(False)
+            self._set_input("court-hours", "N/A")
             return
 
         self._set_input("court-name", court.name)
@@ -144,10 +163,12 @@ class CourtView(BaseView):
 
         response = await self.app.court.delete_court(id=self.court.id)
         if response.status != "success":
-            self.notify(response.status, title="Courts", severity="error")
+            self.notify(response.message, title="Courts", severity="error")
             return
 
+        self.notify(response.message, title="Courts", severity="information")
         self.court = None
+        self.post_message(self.CourtDeleted())
 
     def on_view_closed(self) -> None:
         pass
