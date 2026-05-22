@@ -73,7 +73,7 @@ class APIClient:
             APIError: If the request fails or returns an error status code.
         """
         if "json" in kwargs and isinstance(kwargs["json"], BaseModel):
-            kwargs["json"] = kwargs["json"].model_dump()
+            kwargs["json"] = kwargs["json"].model_dump(mode="json")
 
         try:
             response = await self._client.request(method, endpoint, **kwargs)

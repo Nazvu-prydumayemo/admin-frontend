@@ -28,10 +28,11 @@ CourtView {
         height: auto;
         width: 100%;
         margin-left: 1;
+        layout: vertical;
     }
 
     #court-info-card {
-        width: 2fr;
+        width: 1fr;
         height: auto;
         background: $panel;
         border: round $accent;
@@ -79,5 +80,123 @@ CourtView {
 
     #court-facility:focus-within {
         border: none;
+    }
+
+    #court-schedules {
+        width: 100%;
+        height: auto;
+        background: $panel;
+        border: round $accent;
+        padding: 1 2;
+        margin-top: 1;
+        margin-left: 0;
+    }
+
+    #court-schedule-title {
+        text-style: bold;
+        margin-bottom: 1;
+    }
+
+    .schedule-row {
+        layout: horizontal;
+        width: 100%;
+        height: auto;
+        margin: 0;
+        align: left middle;
+    }
+
+    .schedule-day-label {
+        width: 12;
+        text-style: bold;
+        color: $foreground;
+        margin-right: 1;
+    }
+
+    .schedule-time-input {
+        width: 1fr;
+        margin-right: 1;
+    }
+}
+
+CourtView.-narrow {
+    #court-info-card {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 1;
+    }
+
+    .schedule-row {
+        layout: vertical;
+        margin-bottom: 1;
+    }
+
+    .schedule-day-label {
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    .schedule-time-input {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 0;
+    }
+}
+
+OrderView {
+    #order-scroll {
+        height: 100%;
+        width: 100%;
+    }
+
+    #order-body {
+        height: auto;
+        width: 100%;
+        margin-left: 1;
+    }
+
+    #order-info-card {
+        width: 1fr;
+        height: auto;
+        background: $panel;
+        border: round $accent;
+        padding: 1 2;
+    }
+
+    #order-info-title {
+        text-style: bold;
+        margin-bottom: 1;
+    }
+
+    .info-label {
+        color: $foreground 50%;
+        margin-top: 1;
+        margin-bottom: 1;
+    }
+
+    .info-value {
+        color: $foreground;
+        text-style: bold;
+        border: none;
+        background: transparent;
+        padding-left: 1;
+        padding-right: 1;
+        height: auto;
+    }
+
+    .info-value:focus {
+        border: tall $accent;
+        background: $panel-darken-1;
+    }
+}
+
+OrderView.-narrow {
+    #order-body {
+        layout: vertical;
+    }
+
+    #order-info-card {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 1;
     }
 }

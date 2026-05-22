@@ -159,4 +159,55 @@ CreateCourtModal {
     &.small #buttons-container {
         margin-top: 1;
     }
+
+    #schedule-section-title {
+        text-style: bold;
+        color: $accent;
+        margin-top: 2;
+        margin-bottom: 1;
+        text-align: center;
+    }
+
+    .schedule-hint {
+        color: $foreground 50%;
+        text-style: italic;
+        margin-bottom: 1;
+        text-align: center;
+    }
+
+    .schedule-row {
+        layout: horizontal;
+        width: 100%;
+        height: auto;
+        margin: 0;
+        align: left middle;
+    }
+
+    .schedule-day-label {
+        width: 12;
+        text-style: bold;
+        color: $foreground;
+        margin-right: 1;
+    }
+
+    .schedule-time-input {
+        width: 1fr;
+        margin-right: 1;
+    }
+
+    &.small .schedule-row {
+        layout: vertical;
+        margin-bottom: 1;
+    }
+
+    &.small .schedule-day-label {
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    &.small .schedule-time-input {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 0;
+    }
 }

@@ -1,3 +1,6 @@
+import re
+from datetime import date, time
+
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal, ScrollableContainer, Vertical
@@ -7,11 +10,21 @@ from textual.reactive import reactive
 from textual.validation import Number
 from textual.widgets import Input, RadioButton, RadioSet, Static
 
-from tuiapp.api.court.schema import ChangeCourtRequest, Court
-from tuiapp.widgets.buttons import DangerButton, PrimaryButton
+from tuiapp.api.court.schema import (
+    ChangeCourtRequest,
+    Court,
+    CourtSchedule,
+    CourtScheduleCreate,
+    CourtScheduleSlot,
+)
+from tuiapp.time_utils import local_to_utc, utc_to_local
+from tuiapp.widgets.buttons import DangerButton, PrimaryButton, SecondaryButton
 from tuiapp.widgets.inputs import TextInput
 from tuiapp.widgets.modals.confirmation_modal import ConfirmationModal
 from tuiapp.widgets.views.base_view import BaseView
+
+DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+TIME_RE = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)$")
 
 
 class CourtView(BaseView):
@@ -20,6 +33,8 @@ class CourtView(BaseView):
     DEFAULT_CLASSES = "view-container"
 
     court: reactive[Court | None] = reactive(None)
+    schedule: reactive[list[CourtSchedule] | None] = reactive(None)
+    available_slots: reactive[list[CourtScheduleSlot] | None] = reactive(None)
     small: reactive[bool] = reactive(False)
 
     class CourtDeleted(Message):
@@ -28,11 +43,20 @@ class CourtView(BaseView):
     class CourtChanged(Message):
         pass
 
+    class CourtScheduleChanged(Message):
+        pass
+
     def compose_view(self) -> ComposeResult:
         with ScrollableContainer(id="court-scroll"):
-            with Horizontal(id="court-body"):
+            with Vertical(id="court-body"):
                 with Vertical(id="court-info-card"):
                     yield Static("COURT INFORMATION", id="court-info-title")
+
+                    yield Static("Court ID", classes="info-label")
+                    yield Static("N/A", id="court-id-display", classes="info-value")
+
+                    yield Static("Created", classes="info-label")
+                    yield Static("N/A", id="court-created", classes="info-value")
 
                     yield Static("Court Name", classes="info-label")
                     yield TextInput(id="court-name", classes="info-value")
@@ -59,20 +83,49 @@ class CourtView(BaseView):
                     yield Static("Operating Hours", classes="info-label")
                     yield TextInput(id="court-hours", classes="info-value")
 
-            with Container(id="buttons-container"):
-                yield PrimaryButton(
-                    "Update Court",
-                    variant="primary",
-                    id="update-court",
-                    classes="action-button",
-                )
-                yield Static(id="span")
-                yield DangerButton(
-                    "Delete Court",
-                    variant="error",
-                    id="delete-court",
-                    classes="action-button",
-                )
+                with Vertical(id="court-schedules"):
+                    yield Static("WEEKLY SCHEDULE", id="court-schedule-title")
+                    for day_name in DAY_NAMES:
+                        day_id = day_name.lower()[:3]
+                        with Horizontal(classes="schedule-row"):
+                            yield Static(day_name, classes="schedule-day-label")
+                            yield Input(
+                                placeholder="Open",
+                                id=f"sched-{day_id}-open",
+                                classes="schedule-time-input",
+                            )
+                            yield Input(
+                                placeholder="Close",
+                                id=f"sched-{day_id}-close",
+                                classes="schedule-time-input",
+                            )
+
+                with Container(id="buttons-container"):
+                    yield PrimaryButton(
+                        "Update Court",
+                        variant="primary",
+                        id="update-court",
+                        classes="action-button",
+                    )
+                    yield SecondaryButton(
+                        "Save Schedule",
+                        variant="primary",
+                        id="save-schedule",
+                        classes="action-button",
+                    )
+                    yield Static(id="span")
+                    yield DangerButton(
+                        "Delete Court",
+                        variant="error",
+                        id="delete-court",
+                        classes="action-button",
+                    )
+
+    def _set_static(self, widget_id: str, value: str) -> None:
+        try:
+            self.query_one(f"#{widget_id}", Static).update(value)
+        except NoMatches:
+            pass
 
     def _set_input(self, widget_id: str, value: str) -> None:
         try:
@@ -80,13 +133,18 @@ class CourtView(BaseView):
         except NoMatches:
             pass
 
+    def _get_input(self, widget_id: str) -> str:
+        try:
+            return self.query_one(f"#{widget_id}", Input).value
+        except NoMatches:
+            return ""
+
     def _set_facility(self, is_indoor: bool) -> None:
         try:
             indoor_btn = self.query_one("#court-facility-indoor", RadioButton)
             outdoor_btn = self.query_one("#court-facility-outdoor", RadioButton)
             indoor_btn.value = False
             outdoor_btn.value = False
-
             indoor_btn.value = is_indoor
             outdoor_btn.value = not is_indoor
 
@@ -94,7 +152,6 @@ class CourtView(BaseView):
             pass
 
     def _get_facility(self) -> bool | None:
-        """Return True for Indoor, False for Outdoor, None if nothing selected."""
         try:
             radio_set = self.query_one("#court-facility", RadioSet)
             if radio_set.pressed_index == -1:
@@ -110,6 +167,9 @@ class CourtView(BaseView):
             buttons_container = self.query_one("#buttons-container", Container)
             buttons_container.styles.layout = "vertical" if is_small else "horizontal"
             self.query_one("#update-court", PrimaryButton).styles.width = "100%" if is_small else 32
+            self.query_one("#save-schedule", SecondaryButton).styles.width = (
+                "100%" if is_small else 32
+            )
             self.query_one("#delete-court", DangerButton).styles.width = "100%" if is_small else 32
 
         except NoMatches:
@@ -118,8 +178,126 @@ class CourtView(BaseView):
     def on_resize(self) -> None:
         self.small = self.size.width <= 70
 
-    def watch_court(self, court: Court) -> None:
+    async def watch_court(self, court: Court) -> None:
         self.on_view_activated()
+        self.schedule = None
+        if court is not None:
+            await self._load_schedule(court.id)
+
+    async def _load_schedule(self, court_id: int) -> None:
+        result = await self.app.court.get_court_schedule(court_id)
+        if result.status == "success":
+            self.schedule = result.schedule
+        else:
+            self.schedule = None
+
+        if self.court:
+            today = date.today()
+            slots_result = await self.app.court.get_court_available_slots(court_id, today)
+            if slots_result.status == "success" and slots_result.slots:
+                self.available_slots = slots_result.slots.available_slots
+
+            else:
+                self.available_slots = None
+
+    def watch_schedule(self, new_schedule: list[CourtSchedule] | None) -> None:
+        try:
+            if not new_schedule:
+                for day_name in DAY_NAMES:
+                    day_id = day_name.lower()[:3]
+                    self._set_input(f"sched-{day_id}-open", "")
+                    self._set_input(f"sched-{day_id}-close", "")
+
+                return
+
+            for s in sorted(new_schedule, key=lambda x: x.day_of_week.value):
+                day_name = DAY_NAMES[s.day_of_week.value]
+                day_id = day_name.lower()[:3]
+                if s.opening_time and s.closing_time:
+                    self._set_input(
+                        f"sched-{day_id}-open", utc_to_local(s.opening_time).strftime("%H:%M")
+                    )
+                    self._set_input(
+                        f"sched-{day_id}-close", utc_to_local(s.closing_time).strftime("%H:%M")
+                    )
+
+                else:
+                    self._set_input(f"sched-{day_id}-open", "")
+                    self._set_input(f"sched-{day_id}-close", "")
+
+        except NoMatches:
+            pass
+
+    @on(PrimaryButton.Pressed, "#save-schedule")
+    async def save_schedule(self) -> None:
+        if not self.court:
+            return
+
+        court_id = self.court.id
+        for day_name in DAY_NAMES:
+            day_id = day_name.lower()[:3]
+            open_val = self._get_input(f"sched-{day_id}-open")
+            close_val = self._get_input(f"sched-{day_id}-close")
+
+            if open_val and not close_val:
+                self.notify(
+                    f"{day_name}: missing closing time", title="Validation", severity="warning"
+                )
+                return
+            if close_val and not open_val:
+                self.notify(
+                    f"{day_name}: missing opening time", title="Validation", severity="warning"
+                )
+                return
+            if open_val and close_val:
+                if not TIME_RE.match(open_val):
+                    self.notify(
+                        f"{day_name}: opening time must be HH:MM format",
+                        title="Validation",
+                        severity="warning",
+                    )
+                    return
+                if not TIME_RE.match(close_val):
+                    self.notify(
+                        f"{day_name}: closing time must be HH:MM format",
+                        title="Validation",
+                        severity="warning",
+                    )
+                    return
+
+        for day_name in DAY_NAMES:
+            day_id = day_name.lower()[:3]
+            open_val = self._get_input(f"sched-{day_id}-open")
+            close_val = self._get_input(f"sched-{day_id}-close")
+
+            if not open_val or not close_val:
+                continue
+
+            try:
+                parts = open_val.split(":")
+                opening_local = time(hour=int(parts[0]), minute=int(parts[1]))
+                parts = close_val.split(":")
+                closing_local = time(hour=int(parts[0]), minute=int(parts[1]))
+            except (ValueError, IndexError):
+                continue
+
+            entry = CourtScheduleCreate(
+                day_of_week=(DAY_NAMES.index(day_name)),
+                opening_time=local_to_utc(opening_local),
+                closing_time=local_to_utc(closing_local),
+            )
+
+            result = await self.app.court.post_court_schedule(court_id, entry)  # type: ignore
+            if result.status != "success":
+                self.notify(
+                    f"Failed to save schedule for {day_name}",
+                    title="Schedule",
+                    severity="error",
+                )
+                return
+
+        self.notify("Schedule saved", title="Schedule", severity="information")
+        await self._load_schedule(court_id)
 
     def on_view_activated(self) -> None:
         court = self.court
@@ -128,19 +306,31 @@ class CourtView(BaseView):
         try:
             self.query_one("#court-scroll", ScrollableContainer).disabled = is_empty
             self.query_one("#update-court", PrimaryButton).disabled = is_empty
+            self.query_one("#save-schedule", SecondaryButton).disabled = is_empty
             self.query_one("#delete-court", DangerButton).disabled = is_empty
+
         except NoMatches:
             pass
 
         if is_empty:
+            self._set_static("court-id-display", "N/A")
+            self._set_static("court-created", "N/A")
             self._set_input("court-name", "N/A")
             self._set_input("court-location", "N/A")
             self._set_input("court-surface", "N/A")
             self._set_input("court-price", "0.0")
             self._set_facility(False)
             self._set_input("court-hours", "N/A")
+
+            for day_name in DAY_NAMES:
+                day_id = day_name.lower()[:3]
+                self._set_input(f"sched-{day_id}-open", "")
+                self._set_input(f"sched-{day_id}-close", "")
+
             return
 
+        self._set_static("court-id-display", f"#{court.id}")
+        self._set_static("court-created", court.created_at.strftime("%Y-%m-%d %H:%M:%S"))
         self._set_input("court-name", court.name)
         self._set_input("court-location", court.location or "N/A")
         self._set_input("court-surface", court.surface_type)
@@ -152,7 +342,6 @@ class CourtView(BaseView):
     async def delete_court(self) -> None:
         if not self.court:
             return
-
         self.screen.show_modal(ConfirmationModal("Delete Court"), self._delete_court)
 
     async def _delete_court(self, delete: bool | None) -> None:
@@ -208,7 +397,6 @@ class CourtView(BaseView):
         self.post_message(self.CourtChanged())
 
     def _get_changes(self) -> dict:
-        """Return only the fields that differ from the current court."""
         court = self.court
         if not court:
             return {}
@@ -218,6 +406,7 @@ class CourtView(BaseView):
         def get_input(widget_id: str) -> str:
             try:
                 return self.query_one(f"#{widget_id}", Input).value
+
             except NoMatches:
                 return ""
 
@@ -238,6 +427,7 @@ class CourtView(BaseView):
             price = float(price_str)
             if price != court.price_per_hour:
                 changes["price_per_hour"] = price  # type: ignore
+
         except (ValueError, TypeError):
             pass
 
