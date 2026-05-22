@@ -10,6 +10,7 @@ from tuiapp.api.auth.auth import AuthService
 from tuiapp.api.auth.token_manager import TokenManagerService
 from tuiapp.api.client import APIClient
 from tuiapp.api.court.court import CourtService
+from tuiapp.api.order.order import OrderService
 from tuiapp.screens.dashboard_screen import DashBoardScreen
 from tuiapp.screens.login_screen import LoginScreen
 from tuiapp.themes import tennis_theme, tennis_theme_alpha, tennis_theme_minimal
@@ -36,6 +37,7 @@ class TUIApplication(App):
         self.client = client
         self.token_manager = token_manager
         self.court = CourtService(self.client)
+        self.order = OrderService(self.client)
         self.auth = AuthService(self.client)
 
         self.register_theme(tennis_theme)
