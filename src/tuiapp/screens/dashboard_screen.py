@@ -44,6 +44,7 @@ class DashBoardScreen(AuthScreen):
     ]
 
     def action_push_court_creation(self) -> None:
+        """Open the create court modal."""
         self.show_modal(CreateCourtModal(), self._on_court_created)
 
     PAGE_SIZE = 100

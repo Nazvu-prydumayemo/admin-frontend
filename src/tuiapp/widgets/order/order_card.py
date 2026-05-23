@@ -1,3 +1,5 @@
+"""Widgets for displaying order cards in the TUI."""
+
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Vertical
@@ -13,12 +15,23 @@ MAX_LENGTH = 20
 
 
 def truncate(value: str, max_length: int = MAX_LENGTH) -> str:
+    """Truncate a string with an ellipsis if it exceeds the maximum length.
+
+    Args:
+        value: The string to truncate.
+        max_length: The maximum allowed length before truncation.
+
+    Returns:
+        The original string if within length, or a truncated version with '...'.
+    """
     if len(value) <= max_length:
         return value
     return value[:max_length].rstrip() + "..."
 
 
 class OrderCard(Widget):
+    """A card widget displaying summary information about an order."""
+
     DEFAULT_CLASSES = "order-card"
 
     selected: reactive[bool] = reactive(False)
@@ -27,6 +40,8 @@ class OrderCard(Widget):
         self.set_class(value, "selected")
 
     class Pressed(Message):
+        """Posted when the order card is clicked."""
+
         def __init__(self, order_card: "OrderCard") -> None:
             super().__init__()
             self.order_card = order_card

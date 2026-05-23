@@ -24,23 +24,47 @@ class BaseView(Container):
 
     @abstractmethod
     def compose_view(self) -> ComposeResult:
-        """Each subclass should define the actual content of the view."""
+        """Define the actual content of the view.
+
+        Subclasses must implement this method to yield the widgets
+        that make up the view's body.
+
+        Yields:
+            Widget instances for the view content.
+        """
         pass
 
     @abstractmethod
     def on_view_activated(self) -> None:
-        """Each subclass should define what happens when the view is activated."""
+        """Handle actions when the view becomes active.
+
+        Subclasses must implement this to update the view state
+        when it receives new data.
+        """
         pass
 
     @abstractmethod
     def on_view_closed(self) -> None:
-        """Each subclass should define what happens the view is closed."""
+        """Handle cleanup when the view is closed.
+
+        Subclasses must implement this to perform any necessary cleanup.
+        """
         pass
 
     @property
     def screen(self) -> BaseScreen:
+        """Get the parent screen cast to the base screen type.
+
+        Returns:
+            The BaseScreen instance this view belongs to.
+        """
         return super().screen  # type: ignore
 
     @property
     def app(self) -> TUIApplication:
+        """Get the application instance cast to the TUI application type.
+
+        Returns:
+            The TUIApplication instance.
+        """
         return super().app  # type: ignore

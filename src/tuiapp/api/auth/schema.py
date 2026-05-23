@@ -8,6 +8,14 @@ from tuiapp.api.schema import Result
 
 
 class RoleID(Enum):
+    """Enum representing user role identifiers.
+
+    Attributes:
+        USER: Regular user role (value 3).
+        MODERATOR: Moderator role (value 2).
+        ADMIN: Administrator role (value 1).
+    """
+
     USER = 3
     MODERATOR = 2
     ADMIN = 1

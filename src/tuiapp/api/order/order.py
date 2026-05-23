@@ -4,10 +4,20 @@ from tuiapp.api.order.schema import Order, OrderDetail, OrderDetailResult, Order
 
 
 class OrderService:
+    """Service for managing order operations via the API."""
+
     def __init__(self, client: APIClient) -> None:
         self._client = client
 
     async def get_order(self, id: int) -> OrderResult:
+        """Get a single order by its ID.
+
+        Args:
+            id: The order ID.
+
+        Returns:
+            An OrderResult containing the order data or error details.
+        """
         try:
             response = await self._client.get(f"/orders/{id}", response_model=Order)
             return OrderResult(
@@ -29,6 +39,14 @@ class OrderService:
             )
 
     async def create_order(self, json: OrderRequest) -> OrderResult:
+        """Create a new order.
+
+        Args:
+            json: The order creation request data.
+
+        Returns:
+            An OrderResult containing the created order or error details.
+        """
         try:
             response = await self._client.post("/orders/", json=json, response_model=Order)
             return OrderResult(
@@ -55,6 +73,11 @@ class OrderService:
             )
 
     async def get_orders(self) -> OrderDetailResult:
+        """Get all orders.
+
+        Returns:
+            An OrderDetailResult containing the list of orders or error details.
+        """
         try:
             response = await self._client.get("/orders/", response_model=list[OrderDetail])
             return OrderDetailResult(

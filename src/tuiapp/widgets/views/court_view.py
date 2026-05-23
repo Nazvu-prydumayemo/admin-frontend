@@ -38,15 +38,22 @@ class CourtView(BaseView):
     small: reactive[bool] = reactive(False)
 
     class CourtDeleted(Message):
+        """Posted when a court has been successfully deleted."""
+
         pass
 
     class CourtChanged(Message):
+        """Posted when a court's details have been successfully updated."""
+
         pass
 
     class CourtScheduleChanged(Message):
+        """Posted when a court's schedule has been successfully changed."""
+
         pass
 
     def compose_view(self) -> ComposeResult:
+        """Compose the court detail view with info fields and action buttons."""
         with ScrollableContainer(id="court-scroll"):
             with Vertical(id="court-body"):
                 with Vertical(id="court-info-card"):
@@ -300,6 +307,7 @@ class CourtView(BaseView):
         await self._load_schedule(court_id)
 
     def on_view_activated(self) -> None:
+        """Update the view with the current court data when activated."""
         court = self.court
         is_empty = court is None
 
@@ -442,4 +450,5 @@ class CourtView(BaseView):
         return changes
 
     def on_view_closed(self) -> None:
+        """Clean up when the court view is closed."""
         pass

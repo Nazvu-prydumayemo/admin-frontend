@@ -31,6 +31,8 @@ class BaseScreen(Screen):
 
 
 class AuthScreen(AuthGuard, BaseScreen):  # type: ignore
+    """Base screen for authenticated screens requiring a valid session."""
+
     BINDINGS: ClassVar[list[Binding]] = [
         Binding(
             key="ctrl+l",
@@ -46,4 +48,5 @@ class AuthScreen(AuthGuard, BaseScreen):  # type: ignore
             self.notify("Goodbye!", title="Logout")
 
     def action_logout(self) -> None:
+        """Show a logout confirmation modal and log the user out if confirmed."""
         self.show_modal(ConfirmationModal("Logout"), self._check_logout)
