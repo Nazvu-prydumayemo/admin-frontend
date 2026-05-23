@@ -17,6 +17,7 @@ class BaseModal(ModalScreen[bool]):
     ]
 
     def action_close(self) -> None:
+        """Dismiss the modal with a False result."""
         self.dismiss(False)
 
     @on(Key)
@@ -34,5 +35,12 @@ class BaseModal(ModalScreen[bool]):
 
     @abstractmethod
     def compose_modal(self) -> ComposeResult:
-        """Each subclass should define the actual content of the modal."""
+        """Define the actual content of the modal.
+
+        Subclasses must implement this method to yield the widgets
+        that make up the modal's body.
+
+        Yields:
+            Widget instances for the modal content.
+        """
         pass

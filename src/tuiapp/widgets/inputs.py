@@ -11,6 +11,11 @@ from textual.widgets import Button, Input, MaskedInput
 
 
 class PasswordValidator(Validator):
+    """Validates password strength against security rules.
+
+    Checks for minimum length, uppercase, lowercase, digit, and special character requirements.
+    """
+
     RE_MIN_LENGTH = r".{8,}"
     RE_LOWERCASE = r"[a-z]"
     RE_UPPERCASE = r"[A-Z]"
@@ -18,6 +23,14 @@ class PasswordValidator(Validator):
     RE_SPECIAL = r"[^A-Za-z0-9]"
 
     def validate(self, value: str) -> ValidationResult:
+        """Validate a password string against all required rules.
+
+        Args:
+            value: The password string to validate.
+
+        Returns:
+            A ValidationResult indicating success or the first failure encountered.
+        """
         if not re.search(self.RE_MIN_LENGTH, value):
             return self.failure("At least 8 characters")
 
@@ -37,12 +50,16 @@ class PasswordValidator(Validator):
 
 
 class DigitInput(MaskedInput):
+    """A single-digit masked input field."""
+
     def __init__(self, **kwargs):
         super().__init__(template="9", placeholder="0", **kwargs)
         self.add_class("digit-input")
 
 
 class CodeInput(Widget):
+    """A multi-digit code input widget composed of individual digit fields."""
+
     is_complete: reactive[bool] = reactive(False)
 
     def __init__(self, length: int, **kwargs) -> None:
@@ -108,12 +125,18 @@ class CodeInput(Widget):
         return all(inp.value for inp in self.query(DigitInput))
 
     def get_data(self) -> str | None:
+        """Get the concatenated code from all digit inputs.
+
+        Returns:
+            The full code string if all digits are filled, or None if incomplete.
+        """
         inputs = self.query(DigitInput)
         if not all(inp.value for inp in inputs):
             return None
         return "".join(inp.value for inp in inputs)
 
     def clear(self) -> None:
+        """Clear all digit inputs and reset focus to the first field."""
         for inp in self.query(DigitInput):
             inp.value = ""
             inp.remove_class("-filled")
@@ -158,9 +181,19 @@ class PasswordInput(Widget):
 
     @property
     def value(self):
+        """Get the current password field value.
+
+        Returns:
+            The password string currently entered in the input field.
+        """
         return self.query_one("#password-field", Input).value
 
     @property
     def is_valid(self) -> bool:
+        """Check whether the current password value passes all validation rules.
+
+        Returns:
+            True if the password is valid, False otherwise.
+        """
         field = self.query_one("#password-field", Input)
         return field.is_valid

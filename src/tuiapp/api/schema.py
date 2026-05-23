@@ -21,4 +21,10 @@ class Result(BaseModel):
 
 
 class Message(BaseModel):
+    """A simple message model.
+
+    Attributes:
+        message: The message text.
+    """
+
     message: str

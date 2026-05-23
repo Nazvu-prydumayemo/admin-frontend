@@ -8,11 +8,14 @@ from tuiapp.widgets.modals.base_modal import BaseModal
 
 
 class ConfirmationModal(BaseModal):
+    """A modal that asks the user to confirm or cancel an action."""
+
     def __init__(self, action: str, **kwargs) -> None:
         super().__init__(**kwargs)
         self._action = action
 
     def compose_modal(self) -> ComposeResult:
+        """Compose the confirmation modal with action text and buttons."""
         yield Static(f"Are you sure you want to {self._action}?", id="modal-title")
         with Container(id="buttons-container"):
             yield PrimaryButton("Confirm", variant="success", id="action")

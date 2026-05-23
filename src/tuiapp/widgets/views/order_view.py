@@ -9,6 +9,8 @@ from tuiapp.widgets.views.base_view import BaseView
 
 
 class OrderView(BaseView):
+    """View that displays detailed information about an order."""
+
     DEFAULT_CLASSES = "view-container"
 
     order: reactive[OrderDetail | None] = reactive(None)
@@ -16,6 +18,7 @@ class OrderView(BaseView):
     booking_time_range: reactive[str | None] = reactive(None)
 
     def compose_view(self) -> ComposeResult:
+        """Compose the order detail view with info fields."""
         with ScrollableContainer(id="order-scroll"):
             with Horizontal(id="order-body"):
                 with Vertical(id="order-info-card"):
@@ -43,6 +46,7 @@ class OrderView(BaseView):
         self.on_view_activated()
 
     def on_view_activated(self) -> None:
+        """Update the view with the current order data when activated."""
         order = self.order
         is_empty = order is None
 
@@ -77,4 +81,5 @@ class OrderView(BaseView):
             pass
 
     def on_view_closed(self) -> None:
+        """Clean up when the order view is closed."""
         pass

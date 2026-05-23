@@ -1,3 +1,5 @@
+"""Entry point for the NP-Tennis Admin TUI application."""
+
 from tuiapp.api.auth.token_manager import TokenManagerService
 from tuiapp.api.client import APIClient
 from tuiapp.app import TUIApplication
@@ -5,6 +7,7 @@ from tuiapp.settings import settings
 
 
 def main() -> None:
+    """Initialize and run the TUI application."""
     client = APIClient(settings.api_url)
     token_manager = TokenManagerService(client)
 
